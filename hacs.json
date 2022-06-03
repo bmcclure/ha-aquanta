@@ -1,0 +1,8 @@
+{
+    "name": "Aquanta",
+    "hacs": "1.6.0",
+    "domains": [
+        "water_heater"
+    ],
+    "homeassistant": "0.118.0"
+}

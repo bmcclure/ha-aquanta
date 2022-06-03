@@ -1,0 +1,19 @@
+{
+  "domain": "aquanta",
+  "name": "Aquanta",
+  "version": "0.1.0",
+  "config_flow": true,
+  "documentation": "https://github.com/bmcclure/ha-aquanta",
+  "issue_tracker": "https://github.com/zoopra9457/homebridge-aquanta/issues",
+  "requirements": ["aquanta"],
+  "dhcp": [
+    {
+      "hostname": "Aquanta-*"
+    }
+  ],
+  "dependencies": [],
+  "codeowners": [
+    "@bmcclure"
+  ],
+  "iot_class": "cloud_polling"
+}
