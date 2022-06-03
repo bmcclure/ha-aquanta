@@ -13,13 +13,15 @@
 
 Component to integrate with [Aquanta Smart Water Heater Controllers][aquanta] through their undocumented cloud API.
 
-This integration uses cloud polling to update the data about your water heater controllers regularly.
-
 **This component will set up the following platforms.**
 
 | Platform        | Description                         |
 | --------------- | ----------------------------------- |
 | `water_heater ` | Manage one or more Aquanta devices. |
+
+This integration uses cloud polling to update the data about your water heater controllers regularly.
+
+Note: This is an unofficial integration that is not related to the Aquanta company in any way. There is no official public API yet, so the API being used is undocumented and could change (or be removed) at any point.
 
 ## Installation
 
