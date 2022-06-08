@@ -76,7 +76,7 @@ class AquantaWaterHeaterTemperatureSensor(AquantaEntity, SensorEntity):
         self._attr_unique_id = f"{self._attr_unique_id}_current_temperature"
 
     @property
-    def name(self) -> str | None:
+    def name(self):
         return f"{self.device_name()} Current Temperature"
 
     @property
@@ -105,7 +105,7 @@ class AquantaWaterHeaterSetPointSensor(AquantaEntity, SensorEntity):
         self._attr_unique_id = f"{self._attr_unique_id}_set_point"
 
     @property
-    def name(self) -> str | None:
+    def name(self):
         return f"{self.device_name()} Set Point"
 
     @property
@@ -137,7 +137,7 @@ class AquantaWaterHeaterWaterAvailableSensor(AquantaEntity, SensorEntity):
         self._attr_unique_id = f"{self._attr_unique_id}_hot_water_available"
 
     @property
-    def name(self) -> str | None:
+    def name(self):
         return f"{self.device_name()} Hot Water Available"
 
     @property
@@ -162,7 +162,7 @@ class AquantaWaterHeaterCurrentModeSensor(AquantaEntity, SensorEntity):
         self._attr_unique_id = f"{self._attr_unique_id}_current_mode"
 
     @property
-    def name(self) -> str | None:
+    def name(self):
         return f"{self.device_name()} Current Mode"
 
     @property
@@ -183,7 +183,7 @@ class AquantaWaterHeaterControlEnabledSensor(AquantaEntity, SensorEntity):
         self._attr_unique_id = f"{self._attr_unique_id}_control_enabled"
 
     @property
-    def name(self) -> str | None:
+    def name(self):
         return f"{self.device_name()} Control Enabled"
 
     @property
@@ -204,7 +204,7 @@ class AquantaWaterHeaterIntelligenceEnabledSensor(AquantaEntity, SensorEntity):
         self._attr_unique_id = f"{self._attr_unique_id}_intelligence_enabled"
 
     @property
-    def name(self) -> str | None:
+    def name(self):
         return f"{self.device_name()} Intelligence Enabled"
 
     @property
@@ -228,7 +228,7 @@ class AquantaWaterHeaterThermostatEnabledSensor(AquantaEntity, SensorEntity):
         self._attr_unique_id = f"{self._attr_unique_id}_thermostat_enabled"
 
     @property
-    def name(self) -> str | None:
+    def name(self):
         return f"{self.device_name()} Thermostat Enabled"
 
     @property
@@ -254,7 +254,7 @@ class AquantaWaterHeaterTimeOfUseEnabledSensor(AquantaEntity, SensorEntity):
         self._attr_unique_id = f"{self._attr_unique_id}_time_of_use_enabled"
 
     @property
-    def name(self) -> str | None:
+    def name(self):
         return f"{self.device_name()} Time-of-Use Enabled"
 
     @property
@@ -278,7 +278,7 @@ class AquantaWaterHeaterTimerEnabledSensor(AquantaEntity, SensorEntity):
         self._attr_unique_id = f"{self._attr_unique_id}_timer_enabled"
 
     @property
-    def name(self) -> str | None:
+    def name(self):
         return f"{self.device_name()} Timer Enabled"
 
     @property

@@ -55,15 +55,15 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
         self._attr_unique_id = f"{self._attr_unique_id}_water_heater"
 
     @property
-    def name(self) -> str | None:
+    def name(self):
         return f"{self.device_name()} Water Heater"
 
     @property
-    def current_temperature(self) -> str | None:
+    def current_temperature(self):
         return self.coordinator.data["devices"][self._id]["water"]["temperature"]
 
     @property
-    def target_temperature(self) -> float | None:
+    def target_temperature(self):
         if self.coordinator.data["devices"][self._id]["advanced"]["thermostatEnabled"]:
             return self.coordinator.data["devices"][self._id]["advanced"]["setPoint"]
         else:
