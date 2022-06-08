@@ -22,7 +22,7 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.WATER_HEATER, Platform.SENSOR]
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.WATER_HEATER]
 
 OPERATION_MODE_NORMAL = "Normal"
 OPERATION_MODE_BOOST = "Boost"
