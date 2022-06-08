@@ -15,13 +15,23 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
+    CoordinatorEntity,
 )
 
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.WATER_HEATER]
+PLATFORMS: list[Platform] = [Platform.WATER_HEATER, Platform.SENSOR]
+
+OPERATION_MODE_NORMAL = "Normal"
+OPERATION_MODE_BOOST = "Boost"
+
+CONTROL_MODE_OFF = "Off (No Control)"
+CONTROL_MODE_AQUANTA_INTELLIGENCE = "Aquanta Intelligence"
+CONTROL_MODE_THERMOSTAT = "Thermostat"
+CONTROL_MODE_TIMER = "Manual Timer"
+CONTROL_MODE_TOU = "Time of Use"
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -74,6 +84,7 @@ class AquantaCoordinator(DataUpdateCoordinator):
         self.account_id = account_id
 
     def get_device_data(self):
+        """Gets all data from the Aquanta API for each device"""
         data = {"id": self.account_id, "devices": {}}
 
         for aquanta_id in self.aquanta.devices():
@@ -91,3 +102,28 @@ class AquantaCoordinator(DataUpdateCoordinator):
                 return await self.hass.async_add_executor_job(self.get_device_data)
         except RuntimeError as err:
             raise UpdateFailed(f"Error communicating with Aquanta: {err}") from err
+
+
+class AquantaEntity(CoordinatorEntity):
+    """Defines a main class for an Aquanta controller-based entity."""
+
+    def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
+        super().__init__(coordinator)
+        self._id = aquanta_id
+        self.aquanta_id = aquanta_id
+        self._api = coordinator.aquanta
+        self._attr_unique_id = f"{coordinator.data['id']}_{aquanta_id}"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return info for device registry."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, f"{self.coordinator.data['id']}_{self._id}")},
+            manufacturer="Aquanta",
+            model="Aquanta Water Heater Controller",
+            name=self.coordinator.data["devices"][self._id]["info"]["title"],
+        )
+
+    def device_name(self):
+        """Get the device name from the latest API request"""
+        return self.coordinator.data["devices"][self._id]["info"]["title"]

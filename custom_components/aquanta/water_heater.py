@@ -1,4 +1,6 @@
 """Aquanta water heater component."""
+from datetime import datetime, timedelta, timezone
+
 from homeassistant.components.water_heater import (
     STATE_ECO,
     STATE_ELECTRIC,
@@ -9,18 +11,13 @@ from homeassistant.components.water_heater import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
-    ATTR_TEMPERATURE,
     STATE_OFF,
     TEMP_CELSIUS,
-    TEMP_FAHRENHEIT,
-    Platform,
 )
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import DOMAIN
+from . import DOMAIN, AquantaEntity
 
 STATE_MAP = {
     "off": STATE_ELECTRIC,
@@ -29,6 +26,8 @@ STATE_MAP = {
     "boost": STATE_HIGH_DEMAND,
     "away": STATE_OFF,
 }
+
+ATTR_HOT_WATER_AVAILABLE = "hot_water_available"
 
 
 async def async_setup_entry(
@@ -45,42 +44,52 @@ async def async_setup_entry(
     )
 
 
-class AquantaWaterHeater(CoordinatorEntity, WaterHeaterEntity):
+class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
     """Representation of an Aquanta water heater controller."""
 
-    _attr_supported_features = (
-        WaterHeaterEntityFeature.TARGET_TEMPERATURE | WaterHeaterEntityFeature.AWAY_MODE
-    )
+    _attr_supported_features = WaterHeaterEntityFeature.AWAY_MODE
     _attr_temperature_unit = TEMP_CELSIUS
 
     def __init__(self, coordinator, aquanta_id) -> None:
-        super().__init__(coordinator)
-        self._id = aquanta_id
-        self._attr_name = DOMAIN.title()
-        self._attr_unique_id = f"{coordinator.data['id']}-{aquanta_id}"
-        self._attr_operation_list = [
-            STATE_OFF,
-            STATE_ELECTRIC,
-            STATE_ECO,
-            STATE_PERFORMANCE,
-            STATE_HIGH_DEMAND,
-        ]
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from coordinator."""
-        data = self.coordinator.data["devices"][self._id]
-        self._attr_current_temperature = data["water"]["temperature"]
-        self._attr_current_operation = STATE_MAP[data["info"]["currentMode"]["type"]]
-        self._attr_is_away_mode_on = data["info"]["currentMode"]["type"] == "away"
-        return super()._handle_coordinator_update()
+        super().__init__(coordinator, aquanta_id)
+        self._attr_unique_id = f"{self._attr_unique_id}_water_heater"
 
     @property
-    def device_info(self) -> DeviceInfo:
-        """Return info for device registry."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self._attr_unique_id)},
-            manufacturer="Aquanta",
-            model="Aquanta Water Heater Controller",
-            name=self.coordinator.data["devices"][self._id]["info"]["title"],
+    def name(self) -> str | None:
+        return f"{self.device_name()} Water Heater"
+
+    @property
+    def current_temperature(self) -> str | None:
+        return self.coordinator.data["devices"][self._id]["water"]["temperature"]
+
+    @property
+    def target_temperature(self) -> float | None:
+        if self.coordinator.data["devices"][self._id]["advanced"]["thermostatEnabled"]:
+            return self.coordinator.data["devices"][self._id]["advanced"]["setPoint"]
+        else:
+            return None
+
+    @property
+    def is_away_mode_on(self) -> bool | None:
+        return (
+            self.coordinator.data["devices"][self._id]["info"]["currentMode"]["type"]
+            == "away"
         )
+
+    def turn_away_mode_on(self):
+        schedule = self.get_away_schedule()
+        self._api[self._id].set_away(schedule["start"], schedule["stop"])
+
+    def turn_away_mode_off(self):
+        self._api[self._id].delete_away()
+
+    def get_away_schedule(self):
+        """Gets a schedule in the correct format for enabling Away mode"""
+        start = datetime.now(timezone.utc)
+        end = start + timedelta(days=30)
+        time_format = "%Y-%m-%dT%H:%M:%S.000Z"
+
+        return {
+            "start": start.strftime(time_format),
+            "stop": end.strftime(time_format),
+        }
