@@ -70,7 +70,7 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
             return None
 
     @property
-    def is_away_mode_on(self) -> bool | None:
+    def is_away_mode_on(self):
         return (
             self.coordinator.data["devices"][self._id]["info"]["currentMode"]["type"]
             == "away"
