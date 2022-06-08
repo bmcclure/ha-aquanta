@@ -110,7 +110,6 @@ class AquantaEntity(CoordinatorEntity):
     def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
         super().__init__(coordinator)
         self._id = aquanta_id
-        self.aquanta_id = aquanta_id
         self._api = coordinator.aquanta
         self._attr_unique_id = f"{coordinator.data['id']}_{aquanta_id}"
 
