@@ -15,9 +15,10 @@ Component to integrate with [Aquanta Smart Water Heater Controllers][aquanta] th
 
 **This component will set up the following platforms.**
 
-| Platform        | Description                         |
-| --------------- | ----------------------------------- |
-| `water_heater ` | Manage one or more Aquanta devices. |
+| Platform        | Description                               |
+| --------------- | ----------------------------------------- |
+| `water_heater`  | Manage one or more Aquanta devices.       |
+| `sensor`        | Additional data about each Aquanta device |
 
 This integration uses cloud polling to update the data about your water heater controllers regularly.
 
