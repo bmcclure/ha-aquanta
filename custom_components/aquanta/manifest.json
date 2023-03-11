@@ -6,7 +6,7 @@
   "documentation": "https://github.com/bmcclure/ha-aquanta",
   "issue_tracker": "https://github.com/zoopra9457/homebridge-aquanta/issues",
   "requirements": [
-    "aquanta"
+    "aquanta==0.1"
   ],
   "dhcp": [
     {
