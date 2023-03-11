@@ -1,10 +1,10 @@
 {
   "domain": "aquanta",
   "name": "Aquanta",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "config_flow": true,
   "documentation": "https://github.com/bmcclure/ha-aquanta",
-  "issue_tracker": "https://github.com/zoopra9457/homebridge-aquanta/issues",
+  "issue_tracker": "https://github.com/bmcclure/ha-aquanta/issues",
   "requirements": [
     "aquanta==0.1"
   ],
