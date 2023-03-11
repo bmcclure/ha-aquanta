@@ -48,40 +48,13 @@ class AquantaWaterHeaterAwaySwitch(AquantaEntity, SwitchEntity):
 
     @property
     def is_on(self):
-        on_value = (
-            self.coordinator.data["devices"][self._id]["info"]["currentMode"]["type"]
-            == "away"
-        )
-
-        if not on_value:
-            for record in self.coordinator.data["devices"][self._id]["info"]["records"]:
-                if record["type"] == "away" and record["state"] == "ongoing":
-                    on_value = True
-                    break
-
-        return on_value
+        return self.is_away_mode_on
 
     async def async_turn_on(self, **kwargs):
-        schedule = self.get_away_schedule()
-        await self.hass.async_add_executor_job(
-            self._api[self._id].set_away, schedule["start"], schedule["stop"]
-        )
-        await self.coordinator.async_request_refresh()
+        return await self.async_turn_away_mode_on(**kwargs)
 
     async def async_turn_off(self, **kwargs):
-        await self.hass.async_add_executor_job(self._api[self._id].delete_away)
-        await self.coordinator.async_request_refresh()
-
-    def get_away_schedule(self):
-        """Gets a schedule in the correct format for enabling Away mode"""
-        start = datetime.now(timezone.utc)
-        end = start + timedelta(days=30)
-        time_format = "%Y-%m-%dT%H:%M:%S.000Z"
-
-        return {
-            "start": start.strftime(time_format),
-            "stop": end.strftime(time_format),
-        }
+        return await self.async_turn_away_mode_off(**kwargs)
 
 
 class AquantaWaterHeaterBoostSwitch(AquantaEntity, SwitchEntity):
@@ -101,37 +74,10 @@ class AquantaWaterHeaterBoostSwitch(AquantaEntity, SwitchEntity):
 
     @property
     def is_on(self):
-        on_value = (
-            self.coordinator.data["devices"][self._id]["info"]["currentMode"]["type"]
-            == "boost"
-        )
-
-        if not on_value:
-            for record in self.coordinator.data["devices"][self._id]["info"]["records"]:
-                if record["type"] == "boost" and record["state"] == "ongoing":
-                    on_value = True
-                    break
-
-        return on_value
+        return self.is_boost_mode_on
 
     async def async_turn_on(self, **kwargs):
-        schedule = self.get_boost_schedule()
-        await self.hass.async_add_executor_job(
-            self._api[self._id].set_boost, schedule["start"], schedule["stop"]
-        )
-        await self.coordinator.async_request_refresh()
+        return await self.async_turn_boost_mode_on(**kwargs)
 
     async def async_turn_off(self, **kwargs):
-        await self.hass.async_add_executor_job(self._api[self._id].delete_boost)
-        await self.coordinator.async_request_refresh()
-
-    def get_boost_schedule(self):
-        """Gets a schedule in the correct format for enabling Boost mode"""
-        start = datetime.now(timezone.utc)
-        end = start + timedelta(days=30)
-        time_format = "%Y-%m-%dT%H:%M:%S.000Z"
-
-        return {
-            "start": start.strftime(time_format),
-            "stop": end.strftime(time_format),
-        }
+        return await self.async_turn_boost_mode_off(**kwargs)

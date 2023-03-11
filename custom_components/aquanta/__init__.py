@@ -1,7 +1,7 @@
 """The Aquanta integration."""
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 import logging
 
 import async_timeout
@@ -131,3 +131,83 @@ class AquantaEntity(CoordinatorEntity):
     def device_name(self):
         """Get the device name from the latest API request"""
         return self.coordinator.data["devices"][self._id]["info"]["title"]
+
+    @property
+    def is_away_mode_on(self):
+        """Return true if away mode is on."""
+        on_value = (
+            self.coordinator.data["devices"][self._id]["info"]["currentMode"]["type"]
+            == "away"
+        )
+
+        if not on_value:
+            for record in self.coordinator.data["devices"][self._id]["info"]["records"]:
+                if record["type"] == "away" and record["state"] == "ongoing":
+                    on_value = True
+                    break
+
+        return on_value
+
+    async def async_turn_away_mode_on(self):
+        """Turn away mode on."""
+        schedule = self.get_away_schedule()
+        await self.hass.async_add_executor_job(
+            self._api[self._id].set_away, schedule["start"], schedule["stop"]
+        )
+        await self.coordinator.async_request_refresh()
+
+    async def async_turn_away_mode_off(self):
+        """Turn away mode off."""
+        await self.hass.async_add_executor_job(self._api[self._id].delete_away)
+        await self.coordinator.async_request_refresh()
+
+    def get_away_schedule(self):
+        """Gets a schedule in the correct format for enabling Away mode"""
+        start = datetime.now(timezone.utc)
+        end = start + timedelta(days=30)
+        time_format = "%Y-%m-%dT%H:%M:%S.000Z"
+
+        return {
+            "start": start.strftime(time_format),
+            "stop": end.strftime(time_format),
+        }
+
+    @property
+    def is_boost_mode_on(self):
+        """Return true if boost mode is on."""
+        on_value = (
+            self.coordinator.data["devices"][self._id]["info"]["currentMode"]["type"]
+            == "boost"
+        )
+
+        if not on_value:
+            for record in self.coordinator.data["devices"][self._id]["info"]["records"]:
+                if record["type"] == "boost" and record["state"] == "ongoing":
+                    on_value = True
+                    break
+
+        return on_value
+
+    async def async_turn_boost_mode_on(self, **kwargs):
+        """Turn on boost mode."""
+        schedule = self.get_boost_schedule()
+        await self.hass.async_add_executor_job(
+            self._api[self._id].set_boost, schedule["start"], schedule["stop"]
+        )
+        await self.coordinator.async_request_refresh()
+
+    async def async_turn_boost_mode_off(self, **kwargs):
+        """Turn off boost mode."""
+        await self.hass.async_add_executor_job(self._api[self._id].delete_boost)
+        await self.coordinator.async_request_refresh()
+
+    def get_boost_schedule(self):
+        """Gets a schedule in the correct format for enabling Boost mode"""
+        start = datetime.now(timezone.utc)
+        end = start + timedelta(minutes=30)
+        time_format = "%Y-%m-%dT%H:%M:%S.000Z"
+
+        return {
+            "start": start.strftime(time_format),
+            "stop": end.strftime(time_format),
+        }

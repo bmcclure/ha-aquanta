@@ -1,6 +1,4 @@
 """Aquanta water heater component."""
-from datetime import datetime, timedelta, timezone
-
 from homeassistant.components.water_heater import (
     STATE_ECO,
     STATE_ELECTRIC,
@@ -94,28 +92,3 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
             return self.coordinator.data["devices"][self._id]["advanced"]["setPoint"]
         else:
             return None
-
-    @property
-    def is_away_mode_on(self):
-        return (
-            self.coordinator.data["devices"][self._id]["info"]["currentMode"]["type"]
-            == "away"
-        )
-
-    def turn_away_mode_on(self):
-        schedule = self.get_away_schedule()
-        self._api[self._id].set_away(schedule["start"], schedule["stop"])
-
-    def turn_away_mode_off(self):
-        self._api[self._id].delete_away()
-
-    def get_away_schedule(self):
-        """Gets a schedule in the correct format for enabling Away mode"""
-        start = datetime.now(timezone.utc)
-        end = start + timedelta(days=30)
-        time_format = "%Y-%m-%dT%H:%M:%S.000Z"
-
-        return {
-            "start": start.strftime(time_format),
-            "stop": end.strftime(time_format),
-        }
