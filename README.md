@@ -15,10 +15,12 @@ Component to integrate with [Aquanta Smart Water Heater Controllers][aquanta] th
 
 **This component will set up the following platforms.**
 
-| Platform        | Description                               |
-| --------------- | ----------------------------------------- |
-| `water_heater`  | Manage one or more Aquanta devices.       |
-| `sensor`        | Additional data about each Aquanta device |
+| Platform        | Description                                |
+| --------------- | ------------------------------------------ |
+| `water_heater`  | Manage one or more Aquanta devices.        |
+| `sensor`        | Additional data about each Aquanta device  |
+| `binary_sensor` | On/Off values for various Aquanta settings |
+| `switch`        | Supports toggling Away and Boost modes     |
 
 This integration uses cloud polling to update the data about your water heater controllers regularly.
 
@@ -61,7 +63,6 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 ***
 
 [aquanta]: https://aquanta.io/
-[integration_blueprint]: https://github.com/custom-components/integration_blueprint
 [buymecoffee]: https://www.buymeacoffee.com/benmcclure
 [buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
 [commits-shield]: https://img.shields.io/github/commit-activity/y/bmcclure/ha-aquanta.svg?style=for-the-badge
