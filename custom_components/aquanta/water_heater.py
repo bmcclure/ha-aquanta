@@ -47,20 +47,46 @@ async def async_setup_entry(
 class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
     """Representation of an Aquanta water heater controller."""
 
+    _attr_has_entity_name = True
     _attr_supported_features = WaterHeaterEntityFeature.AWAY_MODE
     _attr_temperature_unit = TEMP_CELSIUS
+    _attr_operation_list = [STATE_ECO, STATE_PERFORMANCE, STATE_OFF]
 
     def __init__(self, coordinator, aquanta_id) -> None:
         super().__init__(coordinator, aquanta_id)
-        self._attr_unique_id = f"{self._attr_unique_id}_water_heater"
+        self._attr_unique_id += "_water_heater"
 
     @property
     def name(self):
-        return f"{self.device_name()} Water Heater"
+        return "Water heater"
 
     @property
     def current_temperature(self):
         return self.coordinator.data["devices"][self._id]["water"]["temperature"]
+
+    @property
+    def current_operation(self):
+        operation = STATE_OFF
+
+        if (
+            self.coordinator.data["devices"][self._id]["info"]["currentMode"]["type"]
+            != "off"
+        ):
+            found = False
+
+            for record in self.coordinator.data["devices"][self._id]["info"]["records"]:
+                if record["type"] == "boost" and record["state"] == "ongoing":
+                    operation = STATE_PERFORMANCE
+                    found = True
+                elif record["type"] == "away" and record["state"] == "ongoing":
+                    operation = STATE_OFF
+                    found = True
+                    break
+
+            if not found:
+                operation = STATE_ECO
+
+        return operation
 
     @property
     def target_temperature(self):

@@ -1,13 +1,17 @@
 """Aquanta sensor component."""
 from homeassistant.components.sensor import (
-    DEVICE_CLASS_TEMPERATURE,
-    STATE_CLASS_MEASUREMENT,
     SensorEntity,
-    SensorEntityDescription,
+    SensorDeviceClass,
+    SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import TEMP_CELSIUS, PERCENTAGE, PRECISION_WHOLE
+from homeassistant.const import (
+    TEMP_CELSIUS,
+    PERCENTAGE,
+    PRECISION_WHOLE,
+)
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import DOMAIN, AquantaCoordinator, AquantaEntity
@@ -38,46 +42,25 @@ async def async_setup_entry(
         AquantaWaterHeaterCurrentModeSensor(coordinator, aquanta_id)
         for aquanta_id in coordinator.data["devices"]
     )
-    async_add_entities(
-        AquantaWaterHeaterControlEnabledSensor(coordinator, aquanta_id)
-        for aquanta_id in coordinator.data["devices"]
-    )
-    async_add_entities(
-        AquantaWaterHeaterIntelligenceEnabledSensor(coordinator, aquanta_id)
-        for aquanta_id in coordinator.data["devices"]
-    )
-    async_add_entities(
-        AquantaWaterHeaterThermostatEnabledSensor(coordinator, aquanta_id)
-        for aquanta_id in coordinator.data["devices"]
-    )
-    async_add_entities(
-        AquantaWaterHeaterTimeOfUseEnabledSensor(coordinator, aquanta_id)
-        for aquanta_id in coordinator.data["devices"]
-    )
-    async_add_entities(
-        AquantaWaterHeaterTimerEnabledSensor(coordinator, aquanta_id)
-        for aquanta_id in coordinator.data["devices"]
-    )
 
 
 class AquantaWaterHeaterTemperatureSensor(AquantaEntity, SensorEntity):
     """Represents a temperature for an Aquanta water heater controller."""
 
-    entity_description: SensorEntityDescription(
-        key="current_temperature",
-        device_class=DEVICE_CLASS_TEMPERATURE,
-        state_class=STATE_CLASS_MEASUREMENT,
-        native_unit_of_measurement=TEMP_CELSIUS,
-    )
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = TEMP_CELSIUS
+    _attr_has_entity_name = True
+    _attr_icon = "mdi:water-thermometer"
 
     def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
         super().__init__(coordinator, aquanta_id)
         self._attr_should_poll = True
-        self._attr_unique_id = f"{self._attr_unique_id}_current_temperature"
+        self._attr_unique_id += "_current_temperature"
 
     @property
     def name(self):
-        return f"{self.device_name()} Current Temperature"
+        return "Temperature"
 
     @property
     def precision(self):
@@ -92,21 +75,20 @@ class AquantaWaterHeaterTemperatureSensor(AquantaEntity, SensorEntity):
 class AquantaWaterHeaterSetPointSensor(AquantaEntity, SensorEntity):
     """Represents the set point for an Aquanta water heater controller."""
 
-    entity_description: SensorEntityDescription(
-        key="set_point",
-        device_class=DEVICE_CLASS_TEMPERATURE,
-        state_class=STATE_CLASS_MEASUREMENT,
-        native_unit_of_measurement=TEMP_CELSIUS,
-    )
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = TEMP_CELSIUS
+    _attr_icon = "mdi:thermometer-water"
+    _attr_has_entity_name = True
 
     def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
         super().__init__(coordinator, aquanta_id)
         self._attr_should_poll = True
-        self._attr_unique_id = f"{self._attr_unique_id}_set_point"
+        self._attr_unique_id += "_set_point"
 
     @property
     def name(self):
-        return f"{self.device_name()} Set Point"
+        return "Set point"
 
     @property
     def precision(self):
@@ -124,25 +106,24 @@ class AquantaWaterHeaterSetPointSensor(AquantaEntity, SensorEntity):
 class AquantaWaterHeaterWaterAvailableSensor(AquantaEntity, SensorEntity):
     """Represents the available water for an Aquanta water heater controller."""
 
-    entity_description: SensorEntityDescription(
-        key="hot_water_available",
-        device_class="hot_water_available",
-        state_class=STATE_CLASS_MEASUREMENT,
-        native_unit_of_measurement=PERCENTAGE,
-    )
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_icon = "mdi:water-percent"
+    _attr_has_entity_name = True
+    _attr_suggested_display_precision = 1
 
     def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
         super().__init__(coordinator, aquanta_id)
         self._attr_should_poll = True
-        self._attr_unique_id = f"{self._attr_unique_id}_hot_water_available"
+        self._attr_unique_id += "_hot_water_available"
 
     @property
     def name(self):
-        return f"{self.device_name()} Hot Water Available"
+        return "Hot water available"
 
     @property
     def native_value(self):
-        return self.coordinator.data["devices"][self._id]["water"]["available"]
+        return self.coordinator.data["devices"][self._id]["water"]["available"] * 100
 
     @property
     def icon(self):
@@ -152,138 +133,26 @@ class AquantaWaterHeaterWaterAvailableSensor(AquantaEntity, SensorEntity):
 class AquantaWaterHeaterCurrentModeSensor(AquantaEntity, SensorEntity):
     """Represents the current mode the Aquanta device is in."""
 
-    entity_description: SensorEntityDescription(
-        key="current_mode",
-    )
+    _attr_has_entity_name = True
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_icon = "mdi:water-sync"
+    _attr_options = [
+        "setpoint",
+        "intelligence",
+        "boost",
+        "away",
+        "off",
+    ]
 
     def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
         super().__init__(coordinator, aquanta_id)
         self._attr_should_poll = True
-        self._attr_unique_id = f"{self._attr_unique_id}_current_mode"
+        self._attr_unique_id += "_current_mode"
 
     @property
     def name(self):
-        return f"{self.device_name()} Current Mode"
+        return "Mode"
 
     @property
     def native_value(self):
         return self.coordinator.data["devices"][self._id]["info"]["currentMode"]["type"]
-
-
-class AquantaWaterHeaterControlEnabledSensor(AquantaEntity, SensorEntity):
-    """Represents whether the Aquanta device is controlling the water heater."""
-
-    entity_description: SensorEntityDescription(
-        key="control_enabled",
-    )
-
-    def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
-        super().__init__(coordinator, aquanta_id)
-        self._attr_should_poll = True
-        self._attr_unique_id = f"{self._attr_unique_id}_control_enabled"
-
-    @property
-    def name(self):
-        return f"{self.device_name()} Control Enabled"
-
-    @property
-    def native_value(self):
-        return self.coordinator.data["devices"][self._id]["advanced"]["controlEnabled"]
-
-
-class AquantaWaterHeaterIntelligenceEnabledSensor(AquantaEntity, SensorEntity):
-    """Represents whether the Aquanta has intelligence enabled."""
-
-    entity_description: SensorEntityDescription(
-        key="intelligence_enabled",
-    )
-
-    def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
-        super().__init__(coordinator, aquanta_id)
-        self._attr_should_poll = True
-        self._attr_unique_id = f"{self._attr_unique_id}_intelligence_enabled"
-
-    @property
-    def name(self):
-        return f"{self.device_name()} Intelligence Enabled"
-
-    @property
-    def native_value(self):
-        return (
-            self.coordinator.data["devices"][self._id]["advanced"]["controlEnabled"]
-            and self.coordinator.data["devices"][self._id]["advanced"]["intelEnabled"]
-        )
-
-
-class AquantaWaterHeaterThermostatEnabledSensor(AquantaEntity, SensorEntity):
-    """Represents whether the Aquanta has its thermostat control enabled."""
-
-    entity_description: SensorEntityDescription(
-        key="thermostat_enabled",
-    )
-
-    def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
-        super().__init__(coordinator, aquanta_id)
-        self._attr_should_poll = True
-        self._attr_unique_id = f"{self._attr_unique_id}_thermostat_enabled"
-
-    @property
-    def name(self):
-        return f"{self.device_name()} Thermostat Enabled"
-
-    @property
-    def native_value(self):
-        return (
-            self.coordinator.data["devices"][self._id]["advanced"]["controlEnabled"]
-            and self.coordinator.data["devices"][self._id]["advanced"][
-                "thermostatEnabled"
-            ]
-        )
-
-
-class AquantaWaterHeaterTimeOfUseEnabledSensor(AquantaEntity, SensorEntity):
-    """Represents whether the Aquanta has its Time of Use control enabled."""
-
-    entity_description: SensorEntityDescription(
-        key="time_of_use_enabled",
-    )
-
-    def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
-        super().__init__(coordinator, aquanta_id)
-        self._attr_should_poll = True
-        self._attr_unique_id = f"{self._attr_unique_id}_time_of_use_enabled"
-
-    @property
-    def name(self):
-        return f"{self.device_name()} Time-of-Use Enabled"
-
-    @property
-    def native_value(self):
-        return (
-            self.coordinator.data["devices"][self._id]["advanced"]["controlEnabled"]
-            and self.coordinator.data["devices"][self._id]["advanced"]["touEnabled"]
-        )
-
-
-class AquantaWaterHeaterTimerEnabledSensor(AquantaEntity, SensorEntity):
-    """Represents whether the Aquanta has its timer control enabled."""
-
-    entity_description: SensorEntityDescription(
-        key="timer_enabled",
-    )
-
-    def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
-        super().__init__(coordinator, aquanta_id)
-        self._attr_should_poll = True
-        self._attr_unique_id = f"{self._attr_unique_id}_timer_enabled"
-
-    @property
-    def name(self):
-        return f"{self.device_name()} Timer Enabled"
-
-    @property
-    def native_value(self):
-        return (
-            self.coordinator.data["devices"][self._id]["advanced"]["controlEnabled"]
-            and self.coordinator.data["devices"][self._id]["advanced"]["timerEnabled"]
-        )
