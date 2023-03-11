@@ -4,5 +4,9 @@
     "python.defaultInterpreterPath": "/usr/local/bin/python",
     "files.associations": {
         "*.yaml": "home-assistant"
-    }
+    },
+    "cSpell.words": [
+        "aquanta",
+        "homeassistant"
+    ],
 }
