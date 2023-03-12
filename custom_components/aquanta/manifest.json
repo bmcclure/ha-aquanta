@@ -8,7 +8,7 @@
   "dependencies": [],
   "dhcp": [
     {
-      "hostname": "Aquanta-*"
+      "hostname": "aquanta-*"
     }
   ],
   "documentation": "https://github.com/bmcclure/ha-aquanta",
