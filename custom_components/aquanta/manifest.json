@@ -1,21 +1,21 @@
 {
   "domain": "aquanta",
   "name": "Aquanta",
-  "version": "2.0.0",
-  "config_flow": true,
-  "documentation": "https://github.com/bmcclure/ha-aquanta",
-  "issue_tracker": "https://github.com/bmcclure/ha-aquanta/issues",
-  "requirements": [
-    "aquanta==0.1"
+  "codeowners": [
+    "@bmcclure"
   ],
+  "config_flow": true,
+  "dependencies": [],
   "dhcp": [
     {
       "hostname": "Aquanta-*"
     }
   ],
-  "dependencies": [],
-  "codeowners": [
-    "@bmcclure"
+  "documentation": "https://github.com/bmcclure/ha-aquanta",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/bmcclure/ha-aquanta/issues",
+  "requirements": [
+    "aquanta==0.1"
   ],
-  "iot_class": "cloud_polling"
+  "version": "2.0.0"
 }
