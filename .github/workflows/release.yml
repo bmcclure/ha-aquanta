@@ -5,6 +5,9 @@ on:
     types:
       - "published"
 
+env:
+  RELEASE_VERSION: ""
+
 jobs:
   release:
     name: "Release"
@@ -13,16 +16,24 @@ jobs:
       - name: "Checkout the repository"
         uses: "actions/checkout@v3.3.0"
 
-      - name: "Adjust version number"
+      - name: "Get version number from release tag"
         shell: "bash"
         run: |
-          yq -i -o json '.version="${{ github.event.release.tag_name }}"' \
+          echo "RELEASE_VERSION=$(echo '${{ github.event.release.tag_name }}' | sed s/v//)" >> $GITHUB_ENV
+
+      - name: "Adjust version number"
+        if: env.release_version != ''
+        shell: "bash"
+        run: |
+          yq -i -o json '.version="${{ env.RELEASE_VERSION }}"' \
             "${{ github.workspace }}/custom_components/aquanta/manifest.json"
+
       - name: "ZIP the integration directory"
         shell: "bash"
         run: |
           cd "${{ github.workspace }}/custom_components/aquanta"
           zip aquanta.zip -r ./
+
       - name: "Upload the ZIP file to the release"
         uses: softprops/action-gh-release@v0.1.15
         with:
