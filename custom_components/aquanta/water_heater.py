@@ -1,31 +1,22 @@
 """Aquanta water heater component."""
+from __future__ import annotations
+
 from homeassistant.components.water_heater import (
     STATE_ECO,
-    STATE_ELECTRIC,
-    STATE_HIGH_DEMAND,
     STATE_PERFORMANCE,
+    STATE_OFF,
     WaterHeaterEntity,
     WaterHeaterEntityFeature,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
-    STATE_OFF,
     TEMP_CELSIUS,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import DOMAIN, AquantaEntity
-
-STATE_MAP = {
-    "off": STATE_ELECTRIC,
-    "setpoint": STATE_PERFORMANCE,
-    "intelligence": STATE_ECO,
-    "boost": STATE_HIGH_DEMAND,
-    "away": STATE_OFF,
-}
-
-ATTR_HOT_WATER_AVAILABLE = "hot_water_available"
+from .entity import AquantaEntity
+from .const import DOMAIN
 
 
 async def async_setup_entry(
@@ -36,6 +27,7 @@ async def async_setup_entry(
     """Initialize Aquanta devices from config entry."""
 
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
+
     async_add_entities(
         AquantaWaterHeater(coordinator, aquanta_id)
         for aquanta_id in coordinator.data["devices"]
@@ -49,30 +41,31 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
     _attr_supported_features = WaterHeaterEntityFeature.AWAY_MODE
     _attr_temperature_unit = TEMP_CELSIUS
     _attr_operation_list = [STATE_ECO, STATE_PERFORMANCE, STATE_OFF]
+    _attr_name = "Water heater"
 
     def __init__(self, coordinator, aquanta_id) -> None:
         super().__init__(coordinator, aquanta_id)
         self._attr_unique_id += "_water_heater"
 
     @property
-    def name(self):
-        return "Water heater"
-
-    @property
     def current_temperature(self):
-        return self.coordinator.data["devices"][self._id]["water"]["temperature"]
+        return self.coordinator.data["devices"][self.aquanta_id]["water"]["temperature"]
 
     @property
     def current_operation(self):
         operation = STATE_OFF
 
         if (
-            self.coordinator.data["devices"][self._id]["info"]["currentMode"]["type"]
+            self.coordinator.data["devices"][self.aquanta_id]["info"]["currentMode"][
+                "type"
+            ]
             != "off"
         ):
             found = False
 
-            for record in self.coordinator.data["devices"][self._id]["info"]["records"]:
+            for record in self.coordinator.data["devices"][self.aquanta_id]["info"][
+                "records"
+            ]:
                 if record["type"] == "boost" and record["state"] == "ongoing":
                     operation = STATE_PERFORMANCE
                     found = True
@@ -88,7 +81,11 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
 
     @property
     def target_temperature(self):
-        if self.coordinator.data["devices"][self._id]["advanced"]["thermostatEnabled"]:
-            return self.coordinator.data["devices"][self._id]["advanced"]["setPoint"]
+        if self.coordinator.data["devices"][self.aquanta_id]["advanced"][
+            "thermostatEnabled"
+        ]:
+            return self.coordinator.data["devices"][self.aquanta_id]["advanced"][
+                "setPoint"
+            ]
         else:
             return None

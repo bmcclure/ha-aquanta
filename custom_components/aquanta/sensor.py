@@ -1,20 +1,91 @@
 """Aquanta sensor component."""
+from __future__ import annotations
+
 from homeassistant.components.sensor import (
     SensorEntity,
     SensorDeviceClass,
     SensorStateClass,
+    SensorEntityDescription,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    TEMP_CELSIUS,
-    PERCENTAGE,
-    PRECISION_WHOLE,
-)
+from homeassistant.const import TEMP_CELSIUS, PERCENTAGE
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import DOMAIN, AquantaCoordinator, AquantaEntity
+from .entity import AquantaEntity
+from .const import DOMAIN
+from .coordinator import AquantaCoordinator
+
+ENTITY_DESCRIPTIONS = (
+    {
+        "desc": SensorEntityDescription(
+            key="current_temperature",
+            name="Temperature",
+            device_class=SensorDeviceClass.TEMPERATURE,
+            state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement=TEMP_CELSIUS,
+            icon="mdi:water-thermometer",
+        ),
+        "native_value": lambda entity: entity.coordinator.data["devices"][
+            entity.aquanta_id
+        ]["water"]["temperature"],
+        "suggested_precision": None,
+        "options": None,
+    },
+    {
+        "desc": SensorEntityDescription(
+            key="set_point",
+            name="Set point",
+            device_class=SensorDeviceClass.TEMPERATURE,
+            state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement=TEMP_CELSIUS,
+            icon="mdi:thermometer-water",
+        ),
+        "native_value": lambda entity: entity.coordinator.data["devices"][
+            entity.aquanta_id
+        ]["advanced"]["setPoint"]
+        if entity.coordinator.data["devices"][entity.aquanta_id]["advanced"][
+            "thermostatEnabled"
+        ]
+        else None,
+        "suggested_precision": None,
+        "options": None,
+    },
+    {
+        "desc": SensorEntityDescription(
+            key="hot_water_available",
+            name="Hot water available",
+            state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement=PERCENTAGE,
+            icon="mdi:water-percent",
+        ),
+        "native_value": lambda entity: (
+            entity.coordinator.data["devices"][entity.aquanta_id]["water"]["available"]
+            * 100
+        ),
+        "suggested_precision": 1,
+        "options": None,
+    },
+    {
+        "desc": SensorEntityDescription(
+            key="current_mode",
+            name="Mode",
+            device_class=SensorDeviceClass.ENUM,
+            icon="mdi:water-sync",
+        ),
+        "native_value": lambda entity: entity.coordinator.data["devices"][
+            entity.aquanta_id
+        ]["info"]["currentMode"]["type"],
+        "suggested_precision": None,
+        "options": [
+            "setpoint",
+            "intelligence",
+            "boost",
+            "away",
+            "off",
+        ],
+    },
+)
 
 
 async def async_setup_entry(
@@ -26,133 +97,63 @@ async def async_setup_entry(
 
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
-    async_add_entities(
-        AquantaWaterHeaterTemperatureSensor(coordinator, aquanta_id)
-        for aquanta_id in coordinator.data["devices"]
-    )
-    async_add_entities(
-        AquantaWaterHeaterSetPointSensor(coordinator, aquanta_id)
-        for aquanta_id in coordinator.data["devices"]
-    )
-    async_add_entities(
-        AquantaWaterHeaterWaterAvailableSensor(coordinator, aquanta_id)
-        for aquanta_id in coordinator.data["devices"]
-    )
-    async_add_entities(
-        AquantaWaterHeaterCurrentModeSensor(coordinator, aquanta_id)
-        for aquanta_id in coordinator.data["devices"]
-    )
+    for aquanta_id in coordinator.data["devices"]:
+        async_add_entities(
+            AquantaSensor(
+                coordinator,
+                aquanta_id,
+                entity_info["desc"],
+                entity_info["native_value"],
+                entity_info["suggested_precision"],
+                entity_info["options"],
+            )
+            for entity_info in ENTITY_DESCRIPTIONS
+        )
 
 
-class AquantaWaterHeaterTemperatureSensor(AquantaEntity, SensorEntity):
-    """Represents a temperature for an Aquanta water heater controller."""
+class AquantaSensor(AquantaEntity, SensorEntity):
+    """Represents a sensor for an Aquanta water heater controller."""
 
-    _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_native_unit_of_measurement = TEMP_CELSIUS
     _attr_has_entity_name = True
-    _attr_icon = "mdi:water-thermometer"
 
-    def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
+    def __init__(
+        self,
+        coordinator: AquantaCoordinator,
+        aquanta_id,
+        entity_description: SensorEntityDescription,
+        native_value_func,
+        suggested_precision: int | None,
+        options: list | None,
+    ) -> None:
         super().__init__(coordinator, aquanta_id)
+        self.entity_description: entity_description
+        self._native_value_func = native_value_func
         self._attr_should_poll = True
-        self._attr_unique_id += "_current_temperature"
+        self._attr_unique_id += "_" + entity_description.key
 
-    @property
-    def name(self):
-        return "Temperature"
+        if entity_description.name is not None:
+            self._attr_name = entity_description.name
 
-    @property
-    def precision(self):
-        """Defines the precision of the value."""
-        return PRECISION_WHOLE
+        if entity_description.device_class is not None:
+            self._attr_device_class = entity_description.device_class
+
+        if entity_description.state_class is not None:
+            self._attr_state_class = entity_description.state_class
+
+        if entity_description.native_unit_of_measurement is not None:
+            self._attr_native_unit_of_measurement = (
+                entity_description.native_unit_of_measurement
+            )
+
+        if entity_description.icon is not None:
+            self._attr_icon = entity_description.icon
+
+        if suggested_precision is not None:
+            self._attr_suggested_display_precision = suggested_precision
+
+        if options is not None:
+            self._attr_options = options
 
     @property
     def native_value(self):
-        return self.coordinator.data["devices"][self._id]["water"]["temperature"]
-
-
-class AquantaWaterHeaterSetPointSensor(AquantaEntity, SensorEntity):
-    """Represents the set point for an Aquanta water heater controller."""
-
-    _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_native_unit_of_measurement = TEMP_CELSIUS
-    _attr_icon = "mdi:thermometer-water"
-    _attr_has_entity_name = True
-
-    def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
-        super().__init__(coordinator, aquanta_id)
-        self._attr_should_poll = True
-        self._attr_unique_id += "_set_point"
-
-    @property
-    def name(self):
-        return "Set point"
-
-    @property
-    def precision(self):
-        """Defines the precision of the value."""
-        return PRECISION_WHOLE
-
-    @property
-    def native_value(self):
-        if self.coordinator.data["devices"][self._id]["advanced"]["thermostatEnabled"]:
-            return self.coordinator.data["devices"][self._id]["advanced"]["setPoint"]
-        else:
-            return None
-
-
-class AquantaWaterHeaterWaterAvailableSensor(AquantaEntity, SensorEntity):
-    """Represents the available water for an Aquanta water heater controller."""
-
-    _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_native_unit_of_measurement = PERCENTAGE
-    _attr_icon = "mdi:water-percent"
-    _attr_has_entity_name = True
-    _attr_suggested_display_precision = 1
-
-    def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
-        super().__init__(coordinator, aquanta_id)
-        self._attr_should_poll = True
-        self._attr_unique_id += "_hot_water_available"
-
-    @property
-    def name(self):
-        return "Hot water available"
-
-    @property
-    def native_value(self):
-        return self.coordinator.data["devices"][self._id]["water"]["available"] * 100
-
-    @property
-    def icon(self):
-        return "mdi:percent"
-
-
-class AquantaWaterHeaterCurrentModeSensor(AquantaEntity, SensorEntity):
-    """Represents the current mode the Aquanta device is in."""
-
-    _attr_has_entity_name = True
-    _attr_device_class = SensorDeviceClass.ENUM
-    _attr_icon = "mdi:water-sync"
-    _attr_options = [
-        "setpoint",
-        "intelligence",
-        "boost",
-        "away",
-        "off",
-    ]
-
-    def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
-        super().__init__(coordinator, aquanta_id)
-        self._attr_should_poll = True
-        self._attr_unique_id += "_current_mode"
-
-    @property
-    def name(self):
-        return "Mode"
-
-    @property
-    def native_value(self):
-        return self.coordinator.data["devices"][self._id]["info"]["currentMode"]["type"]
+        return self._native_value_func(self)

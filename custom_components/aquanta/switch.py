@@ -1,15 +1,41 @@
-"""Aquanta sensor component."""
-from datetime import datetime, timedelta, timezone
+"""Aquanta switch component."""
+from __future__ import annotations
 
 from homeassistant.components.switch import (
     SwitchEntity,
     SwitchDeviceClass,
+    SwitchEntityDescription,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import DOMAIN, AquantaCoordinator, AquantaEntity
+from .entity import AquantaEntity
+from .const import DOMAIN
+from .coordinator import AquantaCoordinator
+
+ENTITY_DESCRIPTIONS = (
+    {
+        "desc": SwitchEntityDescription(
+            key="away",
+            name="Away",
+            device_class=SwitchDeviceClass.SWITCH,
+        ),
+        "is_on": lambda entity: entity.is_away_mode_on,
+        "async_turn_on": lambda entity: entity.async_turn_away_mode_on,
+        "async_turn_off": lambda entity: entity.async_turn_away_mode_off,
+    },
+    {
+        "desc": SwitchEntityDescription(
+            key="boost",
+            name="Boost",
+            device_class=SwitchDeviceClass.SWITCH,
+        ),
+        "is_on": lambda entity: entity.is_boost_mode_on,
+        "async_turn_on": lambda entity: entity.async_turn_boost_mode_on,
+        "async_turn_off": lambda entity: entity.async_turn_boost_mode_off,
+    },
+)
 
 
 async def async_setup_entry(
@@ -21,63 +47,48 @@ async def async_setup_entry(
 
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
-    async_add_entities(
-        AquantaWaterHeaterAwaySwitch(coordinator, aquanta_id)
-        for aquanta_id in coordinator.data["devices"]
-    )
-    async_add_entities(
-        AquantaWaterHeaterBoostSwitch(coordinator, aquanta_id)
-        for aquanta_id in coordinator.data["devices"]
-    )
+    for aquanta_id in coordinator.data["devices"]:
+        async_add_entities(
+            AquantaSwitch(
+                coordinator,
+                aquanta_id,
+                entity_info["desc"],
+                entity_info["is_on"],
+                entity_info["async_turn_on"],
+                entity_info["async_turn_off"],
+            )
+            for entity_info in ENTITY_DESCRIPTIONS
+        )
 
 
-class AquantaWaterHeaterAwaySwitch(AquantaEntity, SwitchEntity):
-    """Represents the away mode of the Aquanta device."""
+class AquantaSwitch(AquantaEntity, SwitchEntity):
+    """Represents a toggle switch for an Aquanta device."""
 
     _attr_has_entity_name = True
-    _attr_device_class = SwitchDeviceClass.SWITCH
 
-    def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
+    def __init__(
+        self,
+        coordinator: AquantaCoordinator,
+        aquanta_id,
+        entity_description: SwitchEntityDescription,
+        is_on_func,
+        async_turn_on_func,
+        async_turn_off_func,
+    ) -> None:
         super().__init__(coordinator, aquanta_id)
+        self.entity_description = entity_description
+        self._is_on_func = is_on_func
+        self._async_turn_on_func = async_turn_on_func
+        self._async_turn_off_func = async_turn_off_func
         self._attr_should_poll = True
-        self._attr_unique_id += "_away"
-
-    @property
-    def name(self):
-        return "Away"
+        self._attr_unique_id += "_" + entity_description.key
 
     @property
     def is_on(self):
-        return self.is_away_mode_on
+        return self._is_on_func(self)
 
     async def async_turn_on(self, **kwargs):
-        return await self.async_turn_away_mode_on(**kwargs)
+        return await self._async_turn_on_func(self)()
 
     async def async_turn_off(self, **kwargs):
-        return await self.async_turn_away_mode_off(**kwargs)
-
-
-class AquantaWaterHeaterBoostSwitch(AquantaEntity, SwitchEntity):
-    """Represents the boost mode of the Aquanta device."""
-
-    _attr_has_entity_name = True
-    _attr_device_class = SwitchDeviceClass.SWITCH
-
-    def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
-        super().__init__(coordinator, aquanta_id)
-        self._attr_should_poll = True
-        self._attr_unique_id += "_boost"
-
-    @property
-    def name(self):
-        return "Boost"
-
-    @property
-    def is_on(self):
-        return self.is_boost_mode_on
-
-    async def async_turn_on(self, **kwargs):
-        return await self.async_turn_boost_mode_on(**kwargs)
-
-    async def async_turn_off(self, **kwargs):
-        return await self.async_turn_boost_mode_off(**kwargs)
+        return await self._async_turn_off_func(self)()
