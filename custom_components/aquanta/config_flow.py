@@ -23,7 +23,7 @@ class AquantaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     async def user_data_schema(self, user_input: dict[str, Any]):
-        """Define a shared schema for user credentials"""
+        """Define a shared schema for user credentials."""
         return vol.Schema(
             {
                 vol.Required(
@@ -85,6 +85,7 @@ class AquantaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_dhcp(
         self, discovery_info: DhcpServiceInfo
     ) -> data_entry_flow.FlowResult:
+        """Handle dhcp discovery."""
         if len(self._async_current_entries(include_ignore=True)) > 0:
             raise data_entry_flow.AbortFlow("already_configured")
 

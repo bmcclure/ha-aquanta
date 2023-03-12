@@ -44,15 +44,18 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
     _attr_name = "Water heater"
 
     def __init__(self, coordinator, aquanta_id) -> None:
+        """Initialize the water heater."""
         super().__init__(coordinator, aquanta_id)
         self._attr_unique_id += "_water_heater"
 
     @property
     def current_temperature(self):
+        """Return the current temperature."""
         return self.coordinator.data["devices"][self.aquanta_id]["water"]["temperature"]
 
     @property
     def current_operation(self):
+        """Return current operation ie. eco, performance, off."""
         operation = STATE_OFF
 
         if (
@@ -81,6 +84,7 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
 
     @property
     def target_temperature(self):
+        """Return the temperature we try to reach."""
         if self.coordinator.data["devices"][self.aquanta_id]["advanced"][
             "thermostatEnabled"
         ]:

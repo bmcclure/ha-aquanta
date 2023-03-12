@@ -75,6 +75,7 @@ class AquantaSwitch(AquantaEntity, SwitchEntity):
         async_turn_on_func,
         async_turn_off_func,
     ) -> None:
+        """Initialize the switch."""
         super().__init__(coordinator, aquanta_id)
         self.entity_description = entity_description
         self._is_on_func = is_on_func
@@ -85,10 +86,13 @@ class AquantaSwitch(AquantaEntity, SwitchEntity):
 
     @property
     def is_on(self):
+        """Return true if the switch is on."""
         return self._is_on_func(self)
 
     async def async_turn_on(self, **kwargs):
+        """Turn the switch on."""
         return await self._async_turn_on_func(self)()
 
     async def async_turn_off(self, **kwargs):
+        """Turn the switch off."""
         return await self._async_turn_off_func(self)()

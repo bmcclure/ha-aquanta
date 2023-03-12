@@ -21,6 +21,7 @@ class AquantaCoordinator(DataUpdateCoordinator):
     config_entry: ConfigEntry
 
     def __init__(self, hass: HomeAssistant, aquanta, account_id) -> None:
+        """Initialize the coordinator."""
         self.aquanta = aquanta
         self.account_id = account_id
         super().__init__(
@@ -31,7 +32,7 @@ class AquantaCoordinator(DataUpdateCoordinator):
         )
 
     def get_device_data(self):
-        """Gets all data from the Aquanta API for each device"""
+        """Get all data from the Aquanta API for each device."""
         data = {"id": self.account_id, "devices": {}}
 
         for aquanta_id in self.aquanta.devices():

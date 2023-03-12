@@ -125,6 +125,7 @@ class AquantaSensor(AquantaEntity, SensorEntity):
         suggested_precision: int | None,
         options: list | None,
     ) -> None:
+        """Initialize the sensor."""
         super().__init__(coordinator, aquanta_id)
         self.entity_description: entity_description
         self._native_value_func = native_value_func
@@ -156,4 +157,5 @@ class AquantaSensor(AquantaEntity, SensorEntity):
 
     @property
     def native_value(self):
+        """Return the state of the sensor."""
         return self._native_value_func(self)

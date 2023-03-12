@@ -118,6 +118,7 @@ class AquantaBinarySensor(AquantaEntity, BinarySensorEntity):
         entity_description: BinarySensorEntityDescription,
         is_on_func,
     ) -> None:
+        """Initialize the binary sensor."""
         super().__init__(coordinator, aquanta_id)
         self.entity_description = entity_description
         self._is_on_func = is_on_func
@@ -126,10 +127,12 @@ class AquantaBinarySensor(AquantaEntity, BinarySensorEntity):
 
     @property
     def icon(self):
+        """Return the icon to use in the frontend, if any."""
         if self.is_on:
             return "mdi:check-circle"
         return "mdi:check-circle-outline"
 
     @property
     def is_on(self):
+        """Return true if the binary sensor is on."""
         return self._is_on_func(self)

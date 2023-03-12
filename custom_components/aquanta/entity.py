@@ -18,6 +18,7 @@ class AquantaEntity(CoordinatorEntity):
     _attr_attribution = ATTRIBUTION
 
     def __init__(self, coordinator: AquantaCoordinator, aquanta_id) -> None:
+        """Initialize the entity."""
         super().__init__(coordinator)
         self._base_unique_id = f"{coordinator.data['id']}_{aquanta_id}"
         self.aquanta_id = aquanta_id
@@ -35,7 +36,7 @@ class AquantaEntity(CoordinatorEntity):
         )
 
     def device_name(self):
-        """Get the device name from the latest API request"""
+        """Get the device name from the latest API request."""
         return self.coordinator.data["devices"][self.aquanta_id]["info"]["title"]
 
     @property
@@ -72,7 +73,7 @@ class AquantaEntity(CoordinatorEntity):
         await self.coordinator.async_request_refresh()
 
     def get_away_schedule(self):
-        """Gets a schedule in the correct format for enabling Away mode"""
+        """Get a schedule in the correct format for enabling Away mode."""
         start = datetime.now(timezone.utc)
         end = start + timedelta(days=30)
         time_format = "%Y-%m-%dT%H:%M:%S.000Z"
@@ -116,7 +117,7 @@ class AquantaEntity(CoordinatorEntity):
         await self.coordinator.async_request_refresh()
 
     def get_boost_schedule(self):
-        """Gets a schedule in the correct format for enabling Boost mode"""
+        """Get a schedule in the correct format for enabling Boost mode."""
         start = datetime.now(timezone.utc)
         end = start + timedelta(minutes=30)
         time_format = "%Y-%m-%dT%H:%M:%S.000Z"
