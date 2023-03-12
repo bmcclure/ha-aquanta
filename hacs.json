@@ -5,6 +5,6 @@
         "sensor",
         "water_heater"
     ],
-    "homeassistant": "0.118.0",
+    "homeassistant": "2023.3.0",
     "render_readme": true
 }
