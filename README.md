@@ -28,16 +28,14 @@ Note: This is an unofficial integration that is not related to the Aquanta compa
 
 ## Installation
 
-You may use one of several options:
-
-### HACS (Recommended)
+### Option 1: HACS (Recommended)
 
 1. Add this repository to HACS.
 2. Search for "Aquanta" under "Integrations".
 3. Install the integration.
 4. Restart Home Assistant.
 
-### Manual
+### Option 2: Manual
 
 1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
 2. If you do not have a `custom_components` directory (folder) there, you need to create it.
