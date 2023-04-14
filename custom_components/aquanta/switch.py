@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .entity import AquantaEntity
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER
 from .coordinator import AquantaCoordinator
 
 ENTITY_DESCRIPTIONS = (
@@ -84,6 +84,7 @@ class AquantaSwitch(AquantaEntity, SwitchEntity):
         self._async_turn_on_func = async_turn_on_func
         self._async_turn_off_func = async_turn_off_func
         self._attr_unique_id = self._base_unique_id + "_" + entity_description.key
+        LOGGER.debug("Created switch with unique ID %s", self._attr_unique_id)
 
     @property
     def is_on(self):

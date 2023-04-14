@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .entity import AquantaEntity
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER
 from .coordinator import AquantaCoordinator
 
 ENTITY_DESCRIPTIONS = (
@@ -132,6 +132,7 @@ class AquantaSensor(AquantaEntity, SensorEntity):
         self._attr_name = entity_description.name
         self._native_value_func = native_value_func
         self._attr_unique_id = self._base_unique_id + "_" + entity_description.key
+        LOGGER.debug("Created sensor with unique ID %s", self._attr_unique_id)
 
         if entity_description.device_class is not None:
             self._attr_device_class = entity_description.device_class

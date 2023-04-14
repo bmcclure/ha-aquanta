@@ -11,7 +11,7 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .entity import AquantaEntity
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER
 from .coordinator import AquantaCoordinator
 
 ENTITY_DESCRIPTIONS = (
@@ -125,6 +125,7 @@ class AquantaBinarySensor(AquantaEntity, BinarySensorEntity):
         self._attr_name = entity_description.name
         self._attr_should_poll = True
         self._attr_unique_id = self._base_unique_id + "_" + entity_description.key
+        LOGGER.debug("Created binary sensor with unique ID %s", self._attr_unique_id)
 
     @property
     def icon(self):
