@@ -79,6 +79,7 @@ class AquantaSwitch(AquantaEntity, SwitchEntity):
         """Initialize the switch."""
         super().__init__(coordinator, aquanta_id)
         self.entity_description = entity_description
+        self._attr_name = entity_description.name
         self._is_on_func = is_on_func
         self._async_turn_on_func = async_turn_on_func
         self._async_turn_off_func = async_turn_off_func

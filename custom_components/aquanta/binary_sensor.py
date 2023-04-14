@@ -122,6 +122,7 @@ class AquantaBinarySensor(AquantaEntity, BinarySensorEntity):
         super().__init__(coordinator, aquanta_id)
         self.entity_description = entity_description
         self._is_on_func = is_on_func
+        self._attr_name = entity_description.name
         self._attr_should_poll = True
         self._attr_unique_id = self._base_unique_id + "_" + entity_description.key
 
