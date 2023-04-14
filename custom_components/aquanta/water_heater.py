@@ -46,7 +46,7 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
     def __init__(self, coordinator, aquanta_id) -> None:
         """Initialize the water heater."""
         super().__init__(coordinator, aquanta_id)
-        self._attr_unique_id += "_water_heater"
+        self._attr_unique_id = self._base_unique_id + "_water_heater"
 
     @property
     def current_temperature(self):

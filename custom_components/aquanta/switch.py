@@ -65,6 +65,7 @@ class AquantaSwitch(AquantaEntity, SwitchEntity):
     """Represents a toggle switch for an Aquanta device."""
 
     _attr_has_entity_name = True
+    _attr_should_poll = True
 
     def __init__(
         self,
@@ -81,8 +82,7 @@ class AquantaSwitch(AquantaEntity, SwitchEntity):
         self._is_on_func = is_on_func
         self._async_turn_on_func = async_turn_on_func
         self._async_turn_off_func = async_turn_off_func
-        self._attr_should_poll = True
-        self._attr_unique_id += "_" + entity_description.key
+        self._attr_unique_id = self._base_unique_id + "_" + entity_description.key
 
     @property
     def is_on(self):

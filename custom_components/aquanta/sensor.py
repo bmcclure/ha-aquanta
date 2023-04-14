@@ -130,7 +130,7 @@ class AquantaSensor(AquantaEntity, SensorEntity):
         self.entity_description: entity_description
         self._native_value_func = native_value_func
         self._attr_should_poll = True
-        self._attr_unique_id += "_" + entity_description.key
+        self._attr_unique_id = self._base_unique_id + "_" + entity_description.key
 
         if entity_description.name is not None:
             self._attr_name = entity_description.name

@@ -23,7 +23,6 @@ class AquantaEntity(CoordinatorEntity):
         self._base_unique_id = f"{coordinator.data['id']}_{aquanta_id}"
         self.aquanta_id = aquanta_id
         self._api = coordinator.aquanta
-        self._attr_unique_id = self._base_unique_id
 
     @property
     def device_info(self) -> DeviceInfo:
