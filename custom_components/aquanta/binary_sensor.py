@@ -96,14 +96,17 @@ async def async_setup_entry(
     """Initialize Aquanta devices from config entry."""
 
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    entities: list[AquantaBinarySensor] = []
 
     for aquanta_id in coordinator.data["devices"]:
-        async_add_entities(
-            AquantaBinarySensor(
-                coordinator, aquanta_id, entity_info["desc"], entity_info["is_on"]
+        for entity_info in ENTITY_DESCRIPTIONS:
+            entities.append(
+                AquantaBinarySensor(
+                    coordinator, aquanta_id, entity_info["desc"], entity_info["is_on"]
+                )
             )
-            for entity_info in ENTITY_DESCRIPTIONS
-        )
+
+    async_add_entities(entities)
 
 
 class AquantaBinarySensor(AquantaEntity, BinarySensorEntity):

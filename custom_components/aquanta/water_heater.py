@@ -27,12 +27,14 @@ async def async_setup_entry(
     """Initialize Aquanta devices from config entry."""
 
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    entities: list[AquantaWaterHeater] = []
 
-    async_add_entities(
-        AquantaWaterHeater(coordinator, aquanta_id)
-        for aquanta_id in coordinator.data["devices"]
-    )
+    for aquanta_id in coordinator.data["devices"]:
+        entities.append(
+            AquantaWaterHeater(coordinator, aquanta_id)
+        )
 
+    async_add_entities(entities)
 
 class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
     """Representation of an Aquanta water heater controller."""

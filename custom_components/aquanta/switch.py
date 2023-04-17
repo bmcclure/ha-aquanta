@@ -46,19 +46,22 @@ async def async_setup_entry(
     """Initialize Aquanta devices from config entry."""
 
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    entities: list[AquantaSwitch] = []
 
     for aquanta_id in coordinator.data["devices"]:
-        async_add_entities(
-            AquantaSwitch(
-                coordinator,
-                aquanta_id,
-                entity_info["desc"],
-                entity_info["is_on"],
-                entity_info["async_turn_on"],
-                entity_info["async_turn_off"],
+        for entity_info in ENTITY_DESCRIPTIONS:
+            entities.append(
+                AquantaSwitch(
+                    coordinator,
+                    aquanta_id,
+                    entity_info["desc"],
+                    entity_info["is_on"],
+                    entity_info["async_turn_on"],
+                    entity_info["async_turn_off"],
+                )
             )
-            for entity_info in ENTITY_DESCRIPTIONS
-        )
+
+    async_add_entities(entities)
 
 
 class AquantaSwitch(AquantaEntity, SwitchEntity):
