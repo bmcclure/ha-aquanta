@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .entity import AquantaEntity
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER
 from .coordinator import AquantaCoordinator
 
 ENTITY_DESCRIPTIONS = (
@@ -46,25 +46,29 @@ async def async_setup_entry(
     """Initialize Aquanta devices from config entry."""
 
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    entities: list[AquantaSwitch] = []
 
     for aquanta_id in coordinator.data["devices"]:
-        async_add_entities(
-            AquantaSwitch(
-                coordinator,
-                aquanta_id,
-                entity_info["desc"],
-                entity_info["is_on"],
-                entity_info["async_turn_on"],
-                entity_info["async_turn_off"],
+        for entity_info in ENTITY_DESCRIPTIONS:
+            entities.append(
+                AquantaSwitch(
+                    coordinator,
+                    aquanta_id,
+                    entity_info["desc"],
+                    entity_info["is_on"],
+                    entity_info["async_turn_on"],
+                    entity_info["async_turn_off"],
+                )
             )
-            for entity_info in ENTITY_DESCRIPTIONS
-        )
+
+    async_add_entities(entities)
 
 
 class AquantaSwitch(AquantaEntity, SwitchEntity):
     """Represents a toggle switch for an Aquanta device."""
 
     _attr_has_entity_name = True
+    _attr_should_poll = True
 
     def __init__(
         self,
@@ -78,11 +82,12 @@ class AquantaSwitch(AquantaEntity, SwitchEntity):
         """Initialize the switch."""
         super().__init__(coordinator, aquanta_id)
         self.entity_description = entity_description
+        self._attr_name = entity_description.name
         self._is_on_func = is_on_func
         self._async_turn_on_func = async_turn_on_func
         self._async_turn_off_func = async_turn_off_func
-        self._attr_should_poll = True
-        self._attr_unique_id += "_" + entity_description.key
+        self._attr_unique_id = self._base_unique_id + "_" + entity_description.key
+        LOGGER.debug("Created switch with unique ID %s", self._attr_unique_id)
 
     @property
     def is_on(self):

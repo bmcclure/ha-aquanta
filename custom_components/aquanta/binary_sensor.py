@@ -11,7 +11,7 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .entity import AquantaEntity
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER
 from .coordinator import AquantaCoordinator
 
 ENTITY_DESCRIPTIONS = (
@@ -96,14 +96,17 @@ async def async_setup_entry(
     """Initialize Aquanta devices from config entry."""
 
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    entities: list[AquantaBinarySensor] = []
 
     for aquanta_id in coordinator.data["devices"]:
-        async_add_entities(
-            AquantaBinarySensor(
-                coordinator, aquanta_id, entity_info["desc"], entity_info["is_on"]
+        for entity_info in ENTITY_DESCRIPTIONS:
+            entities.append(
+                AquantaBinarySensor(
+                    coordinator, aquanta_id, entity_info["desc"], entity_info["is_on"]
+                )
             )
-            for entity_info in ENTITY_DESCRIPTIONS
-        )
+
+    async_add_entities(entities)
 
 
 class AquantaBinarySensor(AquantaEntity, BinarySensorEntity):
@@ -122,8 +125,10 @@ class AquantaBinarySensor(AquantaEntity, BinarySensorEntity):
         super().__init__(coordinator, aquanta_id)
         self.entity_description = entity_description
         self._is_on_func = is_on_func
+        self._attr_name = entity_description.name
         self._attr_should_poll = True
-        self._attr_unique_id += "_" + entity_description.key
+        self._attr_unique_id = self._base_unique_id + "_" + entity_description.key
+        LOGGER.debug("Created binary sensor with unique ID %s", self._attr_unique_id)
 
     @property
     def icon(self):

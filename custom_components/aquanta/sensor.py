@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .entity import AquantaEntity
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER
 from .coordinator import AquantaCoordinator
 
 ENTITY_DESCRIPTIONS = (
@@ -97,24 +97,29 @@ async def async_setup_entry(
 
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
+    entities: list[AquantaSensor] = []
+
     for aquanta_id in coordinator.data["devices"]:
-        async_add_entities(
-            AquantaSensor(
-                coordinator,
-                aquanta_id,
-                entity_info["desc"],
-                entity_info["native_value"],
-                entity_info["suggested_precision"],
-                entity_info["options"],
+        for entity_info in ENTITY_DESCRIPTIONS:
+            entities.append(
+                AquantaSensor(
+                    coordinator,
+                    aquanta_id,
+                    entity_info["desc"],
+                    entity_info["native_value"],
+                    entity_info["suggested_precision"],
+                    entity_info["options"],
+                )
             )
-            for entity_info in ENTITY_DESCRIPTIONS
-        )
+
+    async_add_entities(entities)
 
 
 class AquantaSensor(AquantaEntity, SensorEntity):
     """Represents a sensor for an Aquanta water heater controller."""
 
     _attr_has_entity_name = True
+    _attr_should_poll = True
 
     def __init__(
         self,
@@ -128,12 +133,10 @@ class AquantaSensor(AquantaEntity, SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator, aquanta_id)
         self.entity_description: entity_description
+        self._attr_name = entity_description.name
         self._native_value_func = native_value_func
-        self._attr_should_poll = True
-        self._attr_unique_id += "_" + entity_description.key
-
-        if entity_description.name is not None:
-            self._attr_name = entity_description.name
+        self._attr_unique_id = self._base_unique_id + "_" + entity_description.key
+        LOGGER.debug("Created sensor with unique ID %s", self._attr_unique_id)
 
         if entity_description.device_class is not None:
             self._attr_device_class = entity_description.device_class

@@ -16,7 +16,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .entity import AquantaEntity
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER
 
 
 async def async_setup_entry(
@@ -27,12 +27,14 @@ async def async_setup_entry(
     """Initialize Aquanta devices from config entry."""
 
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    entities: list[AquantaWaterHeater] = []
 
-    async_add_entities(
-        AquantaWaterHeater(coordinator, aquanta_id)
-        for aquanta_id in coordinator.data["devices"]
-    )
+    for aquanta_id in coordinator.data["devices"]:
+        entities.append(
+            AquantaWaterHeater(coordinator, aquanta_id)
+        )
 
+    async_add_entities(entities)
 
 class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
     """Representation of an Aquanta water heater controller."""
@@ -46,7 +48,9 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
     def __init__(self, coordinator, aquanta_id) -> None:
         """Initialize the water heater."""
         super().__init__(coordinator, aquanta_id)
-        self._attr_unique_id += "_water_heater"
+        self._attr_name = "Water heater"
+        self._attr_unique_id = self._base_unique_id + "_water_heater"
+        LOGGER.debug("Created water heater with unique ID %s", self._attr_unique_id)
 
     @property
     def current_temperature(self):
