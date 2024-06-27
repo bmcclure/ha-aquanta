@@ -8,7 +8,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import TEMP_CELSIUS, PERCENTAGE
+from homeassistant.const import UnitOfTemperature, PERCENTAGE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -23,7 +23,7 @@ ENTITY_DESCRIPTIONS = (
             name="Temperature",
             device_class=SensorDeviceClass.TEMPERATURE,
             state_class=SensorStateClass.MEASUREMENT,
-            native_unit_of_measurement=TEMP_CELSIUS,
+            native_unit_of_measurement=UnitOfTemperature.CELSIUS,
             icon="mdi:water-thermometer",
         ),
         "native_value": lambda entity: entity.coordinator.data["devices"][
@@ -38,7 +38,7 @@ ENTITY_DESCRIPTIONS = (
             name="Set point",
             device_class=SensorDeviceClass.TEMPERATURE,
             state_class=SensorStateClass.MEASUREMENT,
-            native_unit_of_measurement=TEMP_CELSIUS,
+            native_unit_of_measurement=UnitOfTemperature.CELSIUS,
             icon="mdi:thermometer-water",
         ),
         "native_value": lambda entity: entity.coordinator.data["devices"][
