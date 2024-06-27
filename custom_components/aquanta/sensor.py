@@ -8,6 +8,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
 )
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.const import UnitOfTemperature, PERCENTAGE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -84,6 +85,21 @@ ENTITY_DESCRIPTIONS = (
             "away",
             "off",
         ],
+    },
+    {
+        "desc": SensorEntityDescription(
+            key="efficiency_level",
+            name="Efficiency level",
+            entity_category=EntityCategory.DIAGNOSTIC,
+            state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement=PERCENTAGE,
+        ),
+        "native_value": lambda entity: (
+            entity.coordinator.data["devices"][entity.aquanta_id]["advanced"]["efficiencySelection"]
+            * 100
+        ),
+        "suggested_precision": 1,
+        "options": None,
     },
 )
 
