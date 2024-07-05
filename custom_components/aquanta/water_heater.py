@@ -17,10 +17,10 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .entity import AquantaEntity
 from .const import DOMAIN, LOGGER
 
-STATE_INTELLIGENCE = "aquanta_intelligence"
-STATE_SETPOINT = "setpoint"
-STATE_TIME_OF_USE = "time_of_use"
-STATE_TIMER = "manual_timer"
+STATE_INTELLIGENCE = "Aquanta Intelligence"
+STATE_SETPOINT = "Setpoint"
+STATE_TIME_OF_USE = "Time of Use"
+STATE_TIMER = "Manual Timer"
 # Away is a special state in homeassistant
 
 
