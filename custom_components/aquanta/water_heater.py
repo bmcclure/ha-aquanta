@@ -3,9 +3,6 @@
 from __future__ import annotations
 
 from homeassistant.components.water_heater import (
-    STATE_ECO,
-    STATE_PERFORMANCE,
-    STATE_OFF,
     WaterHeaterEntity,
     WaterHeaterEntityFeature,
 )
@@ -51,8 +48,6 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_operation_list: list[str] = [
         STATE_INTELLIGENCE,
-        STATE_OFF,
-        STATE_PERFORMANCE,
         STATE_SETPOINT,
         STATE_TIME_OF_USE,
         STATE_TIMER,
@@ -103,8 +98,6 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
             # controller; it doesn't actually disable the water heater. "Away"
             # is the closest state to "off" that Aquanta can provide.
             operation = STATE_SETPOINT
-        elif mode_type == "boost":
-            operation = STATE_PERFORMANCE
         elif "intel" in record_types:
             operation = STATE_INTELLIGENCE
         elif "timer" in record_types:
