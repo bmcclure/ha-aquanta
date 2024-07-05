@@ -112,7 +112,7 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
         elif "tou" in record_types:
             operation = STATE_TIME_OF_USE
 
-        LOGGER.debug("The resolved operation mode is {operation}.")
+        LOGGER.debug("The resolved operation mode is %s.", operation)
         return operation
 
     @property
