@@ -16,6 +16,11 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .entity import AquantaEntity
 from .const import DOMAIN, LOGGER
 
+STATE_INTELLIGENCE = "aquanta_intelligence"
+STATE_SETPOINT = "setpoint"
+STATE_TIME_OF_USE = "time_of_use"
+STATE_TIMER = "manual_timer"
+# Away is a special state in homeassistant
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -38,10 +43,23 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
     """Representation of an Aquanta water heater controller."""
 
     _attr_has_entity_name = True
+    # TODO: Enable setting operation mode from homeassistant
     _attr_supported_features = WaterHeaterEntityFeature.AWAY_MODE
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
-    _attr_operation_list = [STATE_ECO, STATE_PERFORMANCE, STATE_OFF]
+    _attr_operation_list: list[str] = [
+        STATE_INTELLIGENCE,
+        STATE_OFF,
+        STATE_PERFORMANCE,
+        STATE_SETPOINT,
+        STATE_TIME_OF_USE,
+        STATE_TIMER,
+    ]
     _attr_name = "Water heater"
+    # The settable temp range (in celsius) according to Aquanta App
+    _attr_max_temp: float = 110.0
+    _attr_min_temp: float = 10.0
+    _attr_target_temperature_high: None = None
+    _attr_target_temperature_low: None = None
 
     def __init__(self, coordinator, aquanta_id) -> None:
         """Initialize the water heater."""
@@ -51,41 +69,40 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
         LOGGER.debug("Created water heater with unique ID %s", self._attr_unique_id)
 
     @property
-    def current_temperature(self):
+    def current_temperature(self) -> float | None:
         """Return the current temperature."""
         return self.coordinator.data["devices"][self.aquanta_id]["water"]["temperature"]
 
     @property
-    def current_operation(self):
+    def current_operation(self) -> str:
         """Return current operation ie. eco, performance, off."""
-        operation = STATE_OFF
+        mode_type = self.coordinator.data["devices"][self.aquanta_id]["info"]["currentMode"]["type"]
+        # Since and boost/away modes are special temporary states which preempt
+        # other operations states, we need to sometimes look at the records
+        record_types = [record['type'] for record in self.coordinator.data["devices"][self.aquanta_id]["info"]['record']]
+        LOGGER.debug("Aquanta API reports current mode: {mode} with records of type: {record_types}.")
 
-        if (
-            self.coordinator.data["devices"][self.aquanta_id]["info"]["currentMode"][
-                "type"
-            ]
-            != "off"
-        ):
-            found = False
+        operation: str = STATE_SETPOINT
 
-            for record in self.coordinator.data["devices"][self.aquanta_id]["info"][
-                "records"
-            ]:
-                if record["type"] == "boost" and record["state"] == "ongoing":
-                    operation = STATE_PERFORMANCE
-                    found = True
-                elif record["type"] == "away" and record["state"] == "ongoing":
-                    operation = STATE_OFF
-                    found = True
-                    break
+        if mode_type == 'off':
+            # Turning Aquanta "off" actually reverts to the non-smart
+            # controller; it doesn't actually disable the water heater. "Away"
+            # is the closest state to "off" that Aquanta can provide.
+            operation = STATE_SETPOINT
+        elif mode_type == 'boost':
+            operation = STATE_PERFORMANCE
+        elif "intel" in record_types:
+            operation = STATE_INTELLIGENCE
+        elif "timer" in record_types:
+            operation = STATE_TIMER
+        elif "tou" in record_types:
+            operation = STATE_TIME_OF_USE
 
-            if not found:
-                operation = STATE_ECO
-
+        LOGGER.debug("The resolved operation mode is {operation}.")
         return operation
 
     @property
-    def target_temperature(self):
+    def target_temperature(self) -> float | None:
         """Return the temperature we try to reach."""
         if self.coordinator.data["devices"][self.aquanta_id]["advanced"][
             "thermostatEnabled"
