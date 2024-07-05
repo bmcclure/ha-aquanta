@@ -1,4 +1,5 @@
 """Aquanta water heater component."""
+
 from __future__ import annotations
 
 from homeassistant.components.water_heater import (
@@ -22,6 +23,7 @@ STATE_TIME_OF_USE = "time_of_use"
 STATE_TIMER = "manual_timer"
 # Away is a special state in homeassistant
 
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
@@ -38,6 +40,7 @@ async def async_setup_entry(
         )
 
     async_add_entities(entities)
+
 
 class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
     """Representation of an Aquanta water heater controller."""
@@ -76,20 +79,29 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
     @property
     def current_operation(self) -> str:
         """Return current operation ie. eco, performance, off."""
-        mode_type = self.coordinator.data["devices"][self.aquanta_id]["info"]["currentMode"]["type"]
+        mode_type = self.coordinator.data["devices"][self.aquanta_id]["info"][
+            "currentMode"
+        ]["type"]
         # Since and boost/away modes are special temporary states which preempt
         # other operations states, we need to sometimes look at the records
-        record_types = [record['type'] for record in self.coordinator.data["devices"][self.aquanta_id]["info"]['record']]
-        LOGGER.debug("Aquanta API reports current mode: {mode} with records of type: {record_types}.")
+        record_types = [
+            record["type"]
+            for record in self.coordinator.data["devices"][self.aquanta_id]["info"][
+                "records"
+            ]
+        ]
+        LOGGER.debug(
+            "Aquanta API reports current mode: {mode} with records of type: {record_types}."
+        )
 
         operation: str = STATE_SETPOINT
 
-        if mode_type == 'off':
+        if mode_type == "off":
             # Turning Aquanta "off" actually reverts to the non-smart
             # controller; it doesn't actually disable the water heater. "Away"
             # is the closest state to "off" that Aquanta can provide.
             operation = STATE_SETPOINT
-        elif mode_type == 'boost':
+        elif mode_type == "boost":
             operation = STATE_PERFORMANCE
         elif "intel" in record_types:
             operation = STATE_INTELLIGENCE
