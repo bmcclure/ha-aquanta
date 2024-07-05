@@ -4,6 +4,7 @@ from __future__ import annotations
 from datetime import timedelta
 import async_timeout
 
+from aquanta import Aquanta
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import (
@@ -20,10 +21,10 @@ class AquantaCoordinator(DataUpdateCoordinator):
 
     config_entry: ConfigEntry
 
-    def __init__(self, hass: HomeAssistant, aquanta, account_id) -> None:
+    def __init__(self, hass: HomeAssistant, aquanta: Aquanta, account_id: str) -> None:
         """Initialize the coordinator."""
-        self.aquanta = aquanta
-        self.account_id = account_id
+        self.aquanta: Aquanta = aquanta
+        self.account_id: str = account_id
         super().__init__(
             hass=hass,
             logger=LOGGER,
