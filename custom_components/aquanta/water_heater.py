@@ -91,7 +91,9 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
             ]
         ]
         LOGGER.debug(
-            "Aquanta API reports current mode: {mode} with records of type: {record_types}."
+            "Aquanta API reports current mode: %s with records of type: %s.",
+            mode_type,
+            record_types,
         )
 
         operation: str = STATE_SETPOINT
