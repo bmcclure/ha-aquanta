@@ -1,7 +1,7 @@
 {
 	"name": "ludeeus/integration_blueprint",
-	"image": "mcr.microsoft.com/vscode/devcontainers/python:0-3.10-bullseye",
-	"postCreateCommand": "scripts/setup",
+	"image": "mcr.microsoft.com/devcontainers/python:3.12-bullseye",
+	"postCreateCommand": "scripts/init",
 	"forwardPorts": [
 		8123
 	],
@@ -22,7 +22,8 @@
 				"ms-python.isort",
 				"christian-kohler.path-intellisense",
 				"redhat.vscode-yaml",
-				"tamasfe.even-better-toml"
+				"tamasfe.even-better-toml",
+				"charliermarsh.ruff"
 			],
 			"settings": {
 				"files.eol": "\n",
