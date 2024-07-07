@@ -1,4 +1,5 @@
 """Aquanta sensor component."""
+
 from __future__ import annotations
 
 from homeassistant.components.sensor import (
@@ -78,11 +79,12 @@ ENTITY_DESCRIPTIONS = (
         ]["info"]["currentMode"]["type"],
         "suggested_precision": None,
         "options": [
-            "setpoint",
-            "intelligence",
-            "boost",
             "away",
+            "boost",
+            "intelligence",
             "off",
+            "setpoint",
+            "timer",
         ],
     },
     {

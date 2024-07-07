@@ -1,4 +1,5 @@
 """Aquanta switch component."""
+
 from __future__ import annotations
 
 from homeassistant.components.switch import (

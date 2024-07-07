@@ -6,3 +6,5 @@ logger:
   default: info
   logs:
     custom_components.aquanta: debug
+#http:
+#  server_port: 9123

@@ -1,7 +1,7 @@
 {
 	"name": "ludeeus/integration_blueprint",
-	"image": "mcr.microsoft.com/vscode/devcontainers/python:0-3.10-bullseye",
-	"postCreateCommand": "scripts/setup",
+	"image": "mcr.microsoft.com/devcontainers/python:3.12-bullseye",
+	"postCreateCommand": "scripts/init",
 	"forwardPorts": [
 		8123
 	],
@@ -11,15 +11,25 @@
 				"ms-python.python",
 				"github.vscode-pull-request-github",
 				"ryanluker.vscode-coverage-gutters",
-				"ms-python.vscode-pylance"
+				"ms-python.vscode-pylance",
+				"streetsidesoftware.code-spell-checker",
+				"ms-python.black-formatter",
+				"EditorConfig.EditorConfig",
+				"DmitryDorofeev.empty-indent",
+				"github.vscode-github-actions",
+				"GitHub.vscode-pull-request-github",
+				"oderwat.indent-rainbow",
+				"ms-python.isort",
+				"christian-kohler.path-intellisense",
+				"redhat.vscode-yaml",
+				"tamasfe.even-better-toml",
+				"charliermarsh.ruff"
 			],
 			"settings": {
 				"files.eol": "\n",
 				"editor.tabSize": 4,
 				"python.pythonPath": "/usr/bin/python3",
 				"python.analysis.autoSearchPaths": false,
-				"python.linting.pylintEnabled": true,
-				"python.linting.enabled": true,
 				"python.formatting.provider": "black",
 				"python.formatting.blackPath": "/usr/local/py-utils/bin/black",
 				"editor.formatOnPaste": false,
