@@ -9,9 +9,7 @@ from homeassistant.components.water_heater import (
     WaterHeaterEntityFeature,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    TEMP_CELSIUS,
-)
+from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -41,7 +39,7 @@ class AquantaWaterHeater(AquantaEntity, WaterHeaterEntity):
 
     _attr_has_entity_name = True
     _attr_supported_features = WaterHeaterEntityFeature.AWAY_MODE
-    _attr_temperature_unit = TEMP_CELSIUS
+    _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_operation_list = [STATE_ECO, STATE_PERFORMANCE, STATE_OFF]
     _attr_name = "Water heater"
 
