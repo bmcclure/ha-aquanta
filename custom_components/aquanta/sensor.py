@@ -82,9 +82,9 @@ ENTITY_DESCRIPTIONS = (
             "away",
             "boost",
             "intelligence",
+            "off",
             "setpoint",
             "timer",
-            "off",
         ],
     },
 )
