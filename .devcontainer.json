@@ -11,7 +11,17 @@
 				"ms-python.python",
 				"github.vscode-pull-request-github",
 				"ryanluker.vscode-coverage-gutters",
-				"ms-python.vscode-pylance"
+				"ms-python.vscode-pylance",
+				"streetsidesoftware.code-spell-checker",
+				"ms-python.black-formatter",
+				"EditorConfig.EditorConfig",
+				"DmitryDorofeev.empty-indent",
+				"github.vscode-github-actions",
+				"GitHub.vscode-pull-request-github",
+				"oderwat.indent-rainbow",
+				"ms-python.isort",
+				"christian-kohler.path-intellisense",
+				"redhat.vscode-yaml"
 			],
 			"settings": {
 				"files.eol": "\n",
