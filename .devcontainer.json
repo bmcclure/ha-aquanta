@@ -21,7 +21,8 @@
 				"oderwat.indent-rainbow",
 				"ms-python.isort",
 				"christian-kohler.path-intellisense",
-				"redhat.vscode-yaml"
+				"redhat.vscode-yaml",
+				"tamasfe.even-better-toml"
 			],
 			"settings": {
 				"files.eol": "\n",
