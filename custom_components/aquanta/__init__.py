@@ -3,6 +3,7 @@
 For more details about this integration, please refer to
 https://github.com/bmcclure/ha-aquanta
 """
+
 from __future__ import annotations
 
 from aquanta import Aquanta

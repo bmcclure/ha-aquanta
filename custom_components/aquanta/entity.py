@@ -1,4 +1,5 @@
 """AquantaEntity class."""
+
 from __future__ import annotations
 
 from datetime import timedelta, datetime, timezone

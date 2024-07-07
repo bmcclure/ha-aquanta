@@ -1,4 +1,5 @@
 """Adds config flow for Aquanta."""
+
 from __future__ import annotations
 
 from typing import Any

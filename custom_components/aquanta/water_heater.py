@@ -1,4 +1,5 @@
 """Aquanta water heater component."""
+
 from __future__ import annotations
 
 from homeassistant.components.water_heater import (
