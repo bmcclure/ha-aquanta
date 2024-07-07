@@ -99,7 +99,7 @@ ENTITY_DESCRIPTIONS = (
             entity.coordinator.data["devices"][entity.aquanta_id]["advanced"]["efficiencySelection"]
             * 100
         ),
-        "suggested_precision": 1,
+        "suggested_precision": 0,
         "options": None,
     },
 )
